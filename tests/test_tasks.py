@@ -1,15 +1,4 @@
-from fastapi.testclient import TestClient
-from app.main import app
-from app.database import tasks_db
-
-client = TestClient(app)
-
-
-def setup_function():
-    tasks_db.clear()
-
-
-def test_create_task():
+def test_create_task(client):
     response = client.post(
         "/tasks",
         json={
@@ -25,7 +14,7 @@ def test_create_task():
     assert data["completed"] is False
 
 
-def test_get_all_tasks():
+def test_get_all_tasks(client):
     client.post(
         "/tasks",
         json={
@@ -41,7 +30,7 @@ def test_get_all_tasks():
     assert data[0]["title"] == "Task 1"
 
 
-def test_get_task_by_id():
+def test_get_task_by_id(client):
     client.post(
         "/tasks",
         json={
@@ -57,13 +46,13 @@ def test_get_task_by_id():
     assert data["title"] == "Task 1"
 
 
-def test_get_task_not_found():
+def test_get_task_not_found(client):
     response = client.get("/tasks/999")
     assert response.status_code == 404
     assert response.json() == {"detail": "Task not found"}
 
 
-def test_update_task():
+def test_update_task(client):
     client.post(
         "/tasks",
         json={
@@ -88,7 +77,7 @@ def test_update_task():
     assert data["completed"] is True
 
 
-def test_update_task_not_found():
+def test_update_task_not_found(client):
     response = client.put(
         "/tasks/999",
         json={
@@ -102,7 +91,7 @@ def test_update_task_not_found():
     assert response.json() == {"detail": "Task not found"}
 
 
-def test_delete_task():
+def test_delete_task(client):
     client.post(
         "/tasks",
         json={
@@ -118,12 +107,13 @@ def test_delete_task():
     assert data["task"]["id"] == 1
 
 
-def test_delete_task_not_found():
+def test_delete_task_not_found(client):
     response = client.delete("/tasks/999")
     assert response.status_code == 404
     assert response.json() == {"detail": "Task not found"}
 
-def test_create_task_invalid_title():
+
+def test_create_task_invalid_title(client):
     response = client.post(
         "/tasks",
         json={
@@ -134,7 +124,7 @@ def test_create_task_invalid_title():
     assert response.status_code == 422
 
 
-def test_create_task_invalid_description():
+def test_create_task_invalid_description(client):
     response = client.post(
         "/tasks",
         json={
