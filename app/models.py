@@ -1,28 +1,11 @@
-from pydantic import BaseModel, Field
+from sqlalchemy import Column, Integer, String, Boolean
+from app.database import Base
 
 
-class TaskCreate(BaseModel):
-    title: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1, max_length=300)
+class TaskModel(Base):
+    __tablename__ = "tasks"
 
-
-class TaskUpdate(BaseModel):
-    title: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1, max_length=300)
-    completed: bool
-
-
-class Task(BaseModel):
-    id: int
-    title: str
-    description: str
-    completed: bool
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(100), nullable=False)
+    description = Column(String(300), nullable=False)
+    completed = Column(Boolean, default=False, nullable=False)
