@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
+from typing import Literal
 
 
 class TaskCreate(BaseModel):
@@ -35,7 +36,8 @@ class TokenResponse(BaseModel):
 
 class TestRunCreate(BaseModel):
     test_name: str
-    status: str
+    test_type: Literal["api", "ui"] = "api"
+    status: Literal["passed", "failed"]
     result: str | None = None
     execution_time: float | None = None
 
@@ -43,6 +45,7 @@ class TestRunCreate(BaseModel):
 class TestRunResponse(BaseModel):
     id: int
     test_name: str
+    test_type: str
     status: str
     result: str | None = None
     execution_time: float | None = None

@@ -52,6 +52,7 @@ def get_test_run_summary(db: Session = Depends(get_db)):
 def create_test_run(test_run: TestRunCreate, db: Session = Depends(get_db)):
     new_test_run = TestRun(
         test_name=test_run.test_name,
+        test_type=test_run.test_type,
         status=test_run.status,
         result=test_run.result,
         execution_time=test_run.execution_time

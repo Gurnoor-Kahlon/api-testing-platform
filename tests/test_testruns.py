@@ -14,6 +14,7 @@ def test_create_test_run(client):
         "/test-runs",
         json={
             "test_name": "Sample Test",
+            "test_type": "api",
             "status": "passed",
             "result": "Everything OK",
             "execution_time": 1.5
@@ -24,6 +25,7 @@ def test_create_test_run(client):
     assert response.status_code == 201
     data = response.json()
     assert data["test_name"] == "Sample Test"
+    assert data["test_type"] == "api"
     assert data["status"] == "passed"
 
 
@@ -34,6 +36,7 @@ def test_test_run_summary(client):
         "/test-runs",
         json={
             "test_name": "Test 1",
+            "test_type": "api",
             "status": "passed",
             "result": "OK",
             "execution_time": 1.0
@@ -45,6 +48,7 @@ def test_test_run_summary(client):
         "/test-runs",
         json={
             "test_name": "Test 2",
+            "test_type": "api",
             "status": "failed",
             "result": "Error",
             "execution_time": 1.2
@@ -69,6 +73,7 @@ def test_filter_test_runs_by_status(client):
         "/test-runs",
         json={
             "test_name": "Passed Test",
+            "test_type": "api",
             "status": "passed",
             "result": "OK",
             "execution_time": 1.0
@@ -80,6 +85,7 @@ def test_filter_test_runs_by_status(client):
         "/test-runs",
         json={
             "test_name": "Failed Test",
+            "test_type": "api",
             "status": "failed",
             "result": "Error",
             "execution_time": 1.2
@@ -104,6 +110,7 @@ def test_sort_test_runs(client):
         "/test-runs",
         json={
             "test_name": "Test A",
+            "test_type": "api",
             "status": "passed",
             "result": "OK",
             "execution_time": 2.0
@@ -115,6 +122,7 @@ def test_sort_test_runs(client):
         "/test-runs",
         json={
             "test_name": "Test B",
+            "test_type": "api",
             "status": "passed",
             "result": "OK",
             "execution_time": 1.0
@@ -129,3 +137,21 @@ def test_sort_test_runs(client):
 
     assert len(data) >= 2
     assert data[0]["execution_time"] <= data[1]["execution_time"]
+
+
+def test_create_test_run_invalid_type(client):
+    headers = get_auth_headers(client)
+
+    response = client.post(
+        "/test-runs",
+        json={
+            "test_name": "Bad Type Test",
+            "test_type": "mobile",
+            "status": "passed",
+            "result": "Should fail",
+            "execution_time": 1.0
+        },
+        headers=headers
+    )
+
+    assert response.status_code == 422
