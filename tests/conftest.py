@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 from app.database import Base, get_db
 from app.main import app
 
+from tests.report_results import send_test_result
+
 TEST_DATABASE_URL = os.environ["DATABASE_URL"]
 
 test_engine = create_engine(TEST_DATABASE_URL)
@@ -40,3 +42,15 @@ def client():
 @pytest.fixture
 def auth_headers():
     return {"Authorization": "Bearer testtoken123"}
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+
+    if report.when == "call":
+        test_name = item.name
+        status = "passed" if report.passed else "failed"
+        duration = report.duration
+
+        send_test_result(test_name, status, duration)

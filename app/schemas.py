@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 
@@ -30,3 +31,22 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+
+class TestRunCreate(BaseModel):
+    test_name: str
+    status: str
+    result: str | None = None
+    execution_time: float | None = None
+
+
+class TestRunResponse(BaseModel):
+    id: int
+    test_name: str
+    status: str
+    result: str | None = None
+    execution_time: float | None = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
