@@ -17,6 +17,7 @@ class TestRun(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     test_name = Column(String(100), nullable=False)
+    test_type = Column(String(20), nullable=False, default="api")
     status = Column(String(50), nullable=False)
     result = Column(String(300), nullable=True)
     execution_time = Column(Float, nullable=True)
