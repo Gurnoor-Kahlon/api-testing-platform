@@ -8,3 +8,8 @@ from app.database import tasks_db
 def client():
     tasks_db.clear()
     return TestClient(app)
+
+
+@pytest.fixture
+def auth_headers():
+    return {"Authorization": "Bearer testtoken123"}

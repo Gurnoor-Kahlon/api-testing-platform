@@ -1,9 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.models import TaskCreate, TaskUpdate, Task
 from app.database import tasks_db
+from app.auth import verify_token
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"])
-
+router = APIRouter(
+    prefix="/tasks",
+    tags=["Tasks"],
+    dependencies=[Depends(verify_token)]
+)
 
 @router.get("", response_model=list[Task])
 def get_tasks():
