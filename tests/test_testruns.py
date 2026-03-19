@@ -155,3 +155,90 @@ def test_create_test_run_invalid_type(client):
     )
 
     assert response.status_code == 422
+
+def test_filter_test_runs_by_test_type(client):
+    headers = get_auth_headers(client)
+
+    client.post(
+        "/test-runs",
+        json={
+            "test_name": "API Test",
+            "test_type": "api",
+            "status": "passed",
+            "result": "OK",
+            "execution_time": 1.0
+        },
+        headers=headers
+    )
+
+    client.post(
+        "/test-runs",
+        json={
+            "test_name": "UI Test",
+            "test_type": "ui",
+            "status": "passed",
+            "result": "OK",
+            "execution_time": 1.5
+        },
+        headers=headers
+    )
+
+    response = client.get("/test-runs?test_type=ui", headers=headers)
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert isinstance(data, list)
+    assert len(data) >= 1
+    assert all(test_run["test_type"] == "ui" for test_run in data)
+
+def test_filter_test_runs_by_status_and_test_type(client):
+    headers = get_auth_headers(client)
+
+    client.post(
+        "/test-runs",
+        json={
+            "test_name": "API Passed",
+            "test_type": "api",
+            "status": "passed",
+            "result": "OK",
+            "execution_time": 1.0
+        },
+        headers=headers
+    )
+
+    client.post(
+        "/test-runs",
+        json={
+            "test_name": "UI Failed",
+            "test_type": "ui",
+            "status": "failed",
+            "result": "Error",
+            "execution_time": 1.2
+        },
+        headers=headers
+    )
+
+    client.post(
+        "/test-runs",
+        json={
+            "test_name": "UI Passed",
+            "test_type": "ui",
+            "status": "passed",
+            "result": "OK",
+            "execution_time": 1.1
+        },
+        headers=headers
+    )
+
+    response = client.get("/test-runs?status=passed&test_type=ui", headers=headers)
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert isinstance(data, list)
+    assert len(data) >= 1
+    assert all(
+        test_run["status"] == "passed" and test_run["test_type"] == "ui"
+        for test_run in data
+    )

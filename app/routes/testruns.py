@@ -17,6 +17,7 @@ router = APIRouter(
 @router.get("", response_model=list[TestRunResponse])
 def get_test_runs(
     status: Optional[str] = None,
+    test_type: Optional[str] = None,
     sort: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
@@ -24,6 +25,9 @@ def get_test_runs(
 
     if status:
         query = query.filter(TestRun.status == status)
+
+    if test_type:
+        query = query.filter(TestRun.test_type == test_type)
 
     if sort:
         if sort.startswith("-"):
