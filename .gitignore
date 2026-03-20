@@ -5,3 +5,6 @@ __pycache__/
 .env
 .env.local
 .env.docker
+frontend/node_modules/
+frontend/dist/
+tests/selenium/screenshots/
