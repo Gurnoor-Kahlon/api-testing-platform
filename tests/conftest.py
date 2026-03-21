@@ -57,8 +57,10 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
 
     if report.when == "call":
-        # Skip Selenium tests here because they already report themselves
         if "tests/selenium/" in item.nodeid:
+            return
+
+        if os.getenv("DISABLE_RESULT_REPORTING") == "1":
             return
 
         test_name = item.name
