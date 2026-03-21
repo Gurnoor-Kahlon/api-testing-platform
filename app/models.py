@@ -19,6 +19,17 @@ class TestRun(Base):
     test_name = Column(String(100), nullable=False)
     test_type = Column(String(20), nullable=False, default="api")
     status = Column(String(50), nullable=False)
-    result = Column(String(300), nullable=True)
+    result = Column(String(1000), nullable=True)
     execution_time = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class TestSession(Base):
+    __tablename__ = "test_sessions"
+
+    id = Column(String(100), primary_key=True, index=True)
+    status = Column(String(50), nullable=False)
+    started_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    return_code = Column(Integer, nullable=True)
+    stdout = Column(String(5000), nullable=True)
+    stderr = Column(String(5000), nullable=True)

@@ -27,6 +27,8 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:gurnoor15@localhost:5432/test_tasks_db
+      DISABLE_RESULT_REPORTING: "1"
+      CI: "true"
 
     steps:
       - name: Check out repository

@@ -1,6 +1,7 @@
+import os
 import requests
 
-API_URL = "http://localhost:8000/test-runs"
+API_URL = os.getenv("REPORT_API_URL", "http://localhost:8000/test-runs")
 
 
 def send_test_result(name, status, duration):
@@ -9,6 +10,7 @@ def send_test_result(name, status, duration):
             API_URL,
             json={
                 "test_name": name,
+                "test_type": "api",
                 "status": status,
                 "result": f"{name} {status}",
                 "execution_time": duration

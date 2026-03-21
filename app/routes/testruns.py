@@ -29,12 +29,14 @@ def get_test_runs(
     if test_type:
         query = query.filter(TestRun.test_type == test_type)
 
-    if sort:
-        if sort.startswith("-"):
-            field = sort[1:]
-            query = query.order_by(getattr(TestRun, field).desc())
-        else:
-            query = query.order_by(getattr(TestRun, sort))
+    if sort == "execution_time":
+        query = query.order_by(TestRun.execution_time)
+    elif sort == "-execution_time":
+        query = query.order_by(TestRun.execution_time.desc())
+    elif sort == "newest":
+        query = query.order_by(TestRun.created_at.desc())
+    elif sort == "oldest":
+        query = query.order_by(TestRun.created_at.asc())
 
     return query.all()
 
@@ -65,3 +67,13 @@ def create_test_run(test_run: TestRunCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_test_run)
     return new_test_run
+
+@router.delete("")
+def delete_all_test_runs(db: Session = Depends(get_db)):
+    deleted_count = db.query(TestRun).delete()
+    db.commit()
+
+    return {
+        "message": "All test runs deleted",
+        "deleted_count": deleted_count
+    }
