@@ -29,12 +29,14 @@ def get_test_runs(
     if test_type:
         query = query.filter(TestRun.test_type == test_type)
 
-    if sort:
-        if sort.startswith("-"):
-            field = sort[1:]
-            query = query.order_by(getattr(TestRun, field).desc())
-        else:
-            query = query.order_by(getattr(TestRun, sort))
+    if sort == "execution_time":
+        query = query.order_by(TestRun.execution_time)
+    elif sort == "-execution_time":
+        query = query.order_by(TestRun.execution_time.desc())
+    elif sort == "newest":
+        query = query.order_by(TestRun.created_at.desc())
+    elif sort == "oldest":
+        query = query.order_by(TestRun.created_at.asc())
 
     return query.all()
 
