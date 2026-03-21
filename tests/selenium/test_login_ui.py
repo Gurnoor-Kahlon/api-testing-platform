@@ -95,11 +95,11 @@ def wait_for_message(driver):
     )
     return message.text
 
+
 def test_login_success_ui():
     if os.getenv("CI") == "true":
         pytest.skip("Skipping Selenium UI tests in CI")
 
-def test_login_success_ui():
     test_name = "UI Login Success Test"
     start_time = time.time()
     driver = None
@@ -152,11 +152,11 @@ def test_login_success_ui():
         if driver is not None:
             driver.quit()
 
+
 def test_login_failure_ui():
     if os.getenv("CI") == "true":
         pytest.skip("Skipping Selenium UI tests in CI")
 
-def test_login_failure_ui():
     test_name = "UI Login Failure Test"
     start_time = time.time()
     driver = None
