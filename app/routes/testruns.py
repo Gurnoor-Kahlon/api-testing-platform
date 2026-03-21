@@ -67,3 +67,13 @@ def create_test_run(test_run: TestRunCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_test_run)
     return new_test_run
+
+@router.delete("")
+def delete_all_test_runs(db: Session = Depends(get_db)):
+    deleted_count = db.query(TestRun).delete()
+    db.commit()
+
+    return {
+        "message": "All test runs deleted",
+        "deleted_count": deleted_count
+    }

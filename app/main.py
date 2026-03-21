@@ -5,6 +5,7 @@ from app.database import Base, engine
 from app.routes.tasks import router as tasks_router
 from app.routes.auth import router as auth_router
 from app.routes.testruns import router as testruns_router
+from app.routes.testsessions import router as testsessions_router
 
 app = FastAPI(title="Automated API Testing Platform")
 
@@ -36,3 +37,4 @@ def health_check():
 app.include_router(auth_router)
 app.include_router(tasks_router)
 app.include_router(testruns_router)
+app.include_router(testsessions_router)
