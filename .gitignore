@@ -8,3 +8,5 @@ __pycache__/
 frontend/node_modules/
 frontend/dist/
 tests/selenium/screenshots/
+node_modules/
+frontend/node_modules/
