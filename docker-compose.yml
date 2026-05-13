@@ -5,9 +5,9 @@ services:
     image: postgres:16
     container_name: api-testing-platform-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: gurnoor15
-      POSTGRES_DB: tasks_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-tasks_db}
     ports:
       - "5432:5432"
     volumes:
@@ -24,12 +24,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://postgres:gurnoor15@db:5432/tasks_db
-      TEST_DATABASE_URL: sqlite:///./test_app.db
-      REPORT_API_URL: http://localhost:8000/test-runs
-      BACKEND_URL: http://localhost:8000
-      FRONTEND_URL: http://host.docker.internal:5173
-      SELENIUM_URL: http://selenium:4444
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/tasks_db}
+      TEST_DATABASE_URL: ${TEST_DATABASE_URL:-sqlite:///./test_app.db}
+      REPORT_API_URL: ${REPORT_API_URL:-http://localhost:8000/test-runs}
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:8000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://host.docker.internal:5173}
+      SELENIUM_URL: ${SELENIUM_URL:-http://selenium:4444}
 
   selenium:
     image: selenium/standalone-chrome:latest

@@ -2,11 +2,15 @@ venv/
 __pycache__/
 .pytest_cache/
 *.pyc
+*.db
+*.sqlite
+*.sqlite3
 .env
 .env.local
 .env.docker
 frontend/node_modules/
 frontend/dist/
-tests/selenium/screenshots/
 node_modules/
-frontend/node_modules/
+dist/
+build/
+tests/selenium/screenshots/

@@ -15,7 +15,7 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: gurnoor15
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_tasks_db
         ports:
           - 5432:5432
@@ -26,7 +26,7 @@ jobs:
           --health-retries=5
 
     env:
-      DATABASE_URL: postgresql://postgres:gurnoor15@localhost:5432/test_tasks_db
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_tasks_db
       DISABLE_RESULT_REPORTING: "1"
       CI: "true"
 
