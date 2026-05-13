@@ -1,71 +1,98 @@
-# Automated API Testing Platform
+# API Testing Platform
 
-A full-stack learning project for building a professional automated API testing platform with FastAPI, React, Docker, and CI.
+A full-stack automated API testing platform that helps teams create API test cases, organize suites, execute tests, and track quality trends over time.
 
-## Current Scope
-- FastAPI backend with auth, project management, API test case management, test suite management, test run tracking, test session endpoints, and dashboard analytics endpoints.
-- React + Vite frontend with a polished dashboard, summary cards, recent-run tables, failures feed, and responsive navigation.
-- Automated backend test suite with pytest.
-- Docker Compose setup for API + PostgreSQL + Selenium.
-- GitHub Actions workflow running tests on pull requests and pushes to `main`.
+## Why This Project Exists
+Modern backend teams need a lightweight way to validate API behavior quickly. This project demonstrates how to build a production-oriented developer tool with end-to-end workflows across API design, persistence, frontend UX, automated testing, and CI.
+
+## Key Features
+- JWT authentication and user-scoped data access.
+- Project CRUD for test organization.
+- API test case CRUD with assertion metadata.
+- Test suite CRUD and suite membership management.
+- Test execution engine for single test cases and full suites.
+- Dashboard analytics for pass rate, recent runs, and failures.
+- Persistent run history for tracking regressions.
 
 ## Tech Stack
-- **Backend:** Python, FastAPI, SQLAlchemy, PostgreSQL, pytest
-- **Frontend:** React, TypeScript, Vite
+- **Backend:** FastAPI, SQLAlchemy, Alembic, PostgreSQL, pytest, httpx
+- **Frontend:** React, TypeScript, Vite, Chart.js
 - **DevOps:** Docker, Docker Compose, GitHub Actions
 
-## Local Setup (Backend)
-1. Create and activate a virtual environment.
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Create your local env file from the template:
-   ```bash
-   cp .env.example .env.local
-   ```
-4. Start the API:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-5. API runs at `http://localhost:8000`.
+## Architecture Overview
+```text
+React (Vite)
+   |
+   v
+FastAPI routers -> services -> repositories -> PostgreSQL
+   |
+   v
+Test execution engine (httpx) -> run results -> dashboard analytics
+```
 
-## Local Setup (Frontend)
+Backend packages are grouped by concern in `app/core`, `app/db`, `app/models`, `app/schemas`, `app/routers`, `app/services`, and `app/repositories`.
+
+## Screenshots
+Use real screenshots from your local environment:
+- Login page
+- Dashboard summary cards
+- Recent runs + failures feed
+
+> Do not add mockups or generated UI screenshots.
+
+## Local Setup
+### Backend
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env.local
+uvicorn app.main:app --reload
+```
+
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Frontend runs at `http://localhost:5173`.
 
 ## Docker Setup
-1. Create docker env file:
-   ```bash
-   cp .env.docker.example .env.docker
-   ```
-2. Start services:
-   ```bash
-   docker-compose up --build
-   ```
-3. Stop services:
-   ```bash
-   docker-compose down
-   ```
+```bash
+cp .env.docker.example .env.docker
+docker compose up --build
+```
 
-## Testing
-Run backend tests:
+Services:
+- Backend API: `http://localhost:8000`
+- Frontend: `http://localhost:5173`
+- PostgreSQL: `localhost:5432`
+- Selenium: `http://localhost:4444`
+
+Stop services:
+```bash
+docker compose down
+```
+
+## Environment Variables
+### Local development (`.env.local`)
+- `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/tasks_db`
+- `BACKEND_URL=http://localhost:8000`
+- `FRONTEND_URL=http://localhost:5173`
+- `VITE_API_BASE_URL=http://localhost:8000`
+
+### Docker development (`.env.docker`)
+- `DATABASE_URL=postgresql://postgres:postgres@db:5432/tasks_db`
+- `BACKEND_URL=http://api:8000`
+- `FRONTEND_URL=http://frontend:5173`
+- `SELENIUM_URL=http://selenium:4444`
+
+## Running Tests
 ```bash
 pytest
 ```
 
-
-## Authentication Flow
-- Register with `POST /auth/register` using email, full name, and password.
-- Login with `POST /auth/login` to receive a JWT access token.
-- Call protected endpoints using `Authorization: Bearer <token>`.
-- Get the current user with `GET /auth/me`.
-
-### Example Requests
+## API Examples
 ```bash
 curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
@@ -76,78 +103,65 @@ curl -X POST http://localhost:8000/auth/login \
   -d '{"email":"dev@example.com","password":"SecurePass123"}'
 ```
 
-### Protected Project + Testing Endpoints
-- Test Cases: `POST /projects/{project_id}/test-cases`, `GET /projects/{project_id}/test-cases`, `GET /test-cases/{id}`, `PUT /test-cases/{id}`, `DELETE /test-cases/{id}`
-- Test Suites: `POST /projects/{project_id}/test-suites`, `GET /projects/{project_id}/test-suites`, `GET /test-suites/{id}`, `PUT /test-suites/{id}`, `DELETE /test-suites/{id}`
-- Suite Membership: `POST /test-suites/{suite_id}/test-cases/{test_case_id}`, `DELETE /test-suites/{suite_id}/test-cases/{test_case_id}`
-
-### Protected Project Endpoints
-- `POST /projects`
-- `GET /projects`
-- `GET /projects/{id}`
-- `PUT /projects/{id}`
-- `DELETE /projects/{id}`
-
-Projects are user-scoped: each user can only access their own project data.
-
-
-## Demo Flow
-1. Register/Login.
-2. Create a project.
-3. Create API test cases.
-4. Create a test suite and add test cases.
-5. Run test cases or suites.
-6. View dashboard analytics and run results.
-
-## Dashboard Endpoints
+Protected examples:
+- `POST /projects/{project_id}/test-cases`
+- `POST /test-cases/{id}/run`
+- `POST /test-suites/{id}/run`
 - `GET /dashboard/summary`
-- `GET /dashboard/recent-runs`
-- `GET /dashboard/pass-rate`
-- `GET /dashboard/failures`
 
-## Screenshots
-Add real product screenshots here after running the UI locally:
-- Login screen
-- Dashboard overview
-- Latest runs and recent failures
+## GitHub Actions / CI
+On every pull request to `main`, CI runs:
+- Backend pytest suite with PostgreSQL service
+- Frontend lint (`npm run lint`)
+- Frontend build (`npm run build`)
+- Dependency caching for pip and npm installs
 
-## Security Notes
-- Never commit real secrets or `.env` files.
-- Use `.env.example` and `.env.docker.example` for safe defaults only.
+Workflow file: `.github/workflows/ci.yml`.
 
-## Planned Improvements
-- Add structured test execution pipeline and historical analytics dashboard.
-- Expand frontend beyond scaffold to full product UI.
-
-
-## Backend Architecture
-- Backend modules are organized by concern under `app/core`, `app/db`, `app/models`, `app/schemas`, `app/routers`, `app/services`, and `app/repositories`.
-- Legacy imports (`app.database`, `app.models`, `app.schemas`, `app.auth`) remain as compatibility shims while the architecture evolves.
-
-## Database Migrations
-- Alembic is configured in `alembic.ini` and `alembic/`.
-- Run migrations with:
-```bash
-alembic upgrade head
+## Project Structure
+```text
+app/
+  core/ db/ models/ repositories/ routers/ schemas/ services/
+frontend/
+tests/
+alembic/
+.github/workflows/
 ```
 
+## Demo Workflow
+1. Register and login.
+2. Create a project.
+3. Add API test cases.
+4. Create a test suite and attach test cases.
+5. Execute test case or suite runs.
+6. Review dashboard metrics and failure trends.
 
-## Test Execution Engine (Phase 5)
+## Development Workflow
+- Create focused feature branches.
+- Keep PRs small and reviewable.
+- Use Conventional Commits.
+- Add/update tests for backend changes.
+- Update docs when behavior changes.
 
-- Run a single test case: `POST /test-cases/{id}/run`
-- View single test case run history: `GET /test-cases/{id}/runs`
-- Run a full suite: `POST /test-suites/{id}/run`
-- View suite run history: `GET /test-suites/{id}/runs`
-- View all runs for current user: `GET /test-runs` and `GET /test-runs/{id}`
+See `CONTRIBUTING.md` for full contribution and PR guidance.
 
-The execution engine uses `httpx` to send stored requests and validates:
-- expected status code
-- expected JSON field/value
-- response-time threshold
+## Troubleshooting
+- **Database connection issues:** verify `DATABASE_URL` and confirm PostgreSQL is running.
+- **Frontend cannot reach API:** verify `VITE_API_BASE_URL` and backend port mapping.
+- **Docker startup errors:** ensure `.env.docker` exists and ports 5432/5173/8000 are free.
 
-Each run stores pass/fail status, failure reason, actual status code, actual response time, timestamp, and a small response preview.
+## Future Improvements
+- Background job queue for long-running suite execution.
+- Additional assertion operators (regex, contains, ranges, array checks).
+- Rich run-history filtering and trend visualization.
+- Role-based collaboration for team projects.
 
-### Planned Improvements
-- Add dedicated frontend pages for run history and suite execution controls.
-- Add richer assertion operators (contains, not-equals, regex, array length).
-- Add asynchronous/background suite execution for long-running suites.
+## Resume Bullet Points
+- Built a full-stack automated API testing platform using FastAPI, React/TypeScript, PostgreSQL, Docker, and pytest, enabling users to create API test cases, execute test suites, and review pass/fail history in a dashboard.
+- Implemented an API test execution engine with `httpx`, assertion validation, test run history, JWT auth, and pull-request CI workflows in GitHub Actions.
+- Containerized backend, frontend, and database services with Docker Compose and documented local + containerized workflows for reproducible development.
+
+## What I Learned
+- Designing API-first systems with clear schema and service boundaries.
+- Building trustworthy automation with repeatable tests and CI.
+- Translating engineering work into clear documentation and portfolio-ready project narratives.
