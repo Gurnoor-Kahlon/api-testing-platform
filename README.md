@@ -3,7 +3,7 @@
 A full-stack learning project for building a professional automated API testing platform with FastAPI, React, Docker, and CI.
 
 ## Current Scope
-- FastAPI backend with auth, task management, test run tracking, and test session endpoints.
+- FastAPI backend with auth, project management, API test case management, test suite management, test run tracking, and test session endpoints.
 - React + Vite frontend scaffold.
 - Automated backend test suite with pytest.
 - Docker Compose setup for API + PostgreSQL + Selenium.
@@ -76,6 +76,11 @@ curl -X POST http://localhost:8000/auth/login \
   -d '{"email":"dev@example.com","password":"SecurePass123"}'
 ```
 
+### Protected Project + Testing Endpoints
+- Test Cases: `POST /projects/{project_id}/test-cases`, `GET /projects/{project_id}/test-cases`, `GET /test-cases/{id}`, `PUT /test-cases/{id}`, `DELETE /test-cases/{id}`
+- Test Suites: `POST /projects/{project_id}/test-suites`, `GET /projects/{project_id}/test-suites`, `GET /test-suites/{id}`, `PUT /test-suites/{id}`, `DELETE /test-suites/{id}`
+- Suite Membership: `POST /test-suites/{suite_id}/test-cases/{test_case_id}`, `DELETE /test-suites/{suite_id}/test-cases/{test_case_id}`
+
 ### Protected Project Endpoints
 - `POST /projects`
 - `GET /projects`
@@ -90,7 +95,6 @@ Projects are user-scoped: each user can only access their own project data.
 - Use `.env.example` and `.env.docker.example` for safe defaults only.
 
 ## Planned Improvements
-- Add project/suite/test-case domain models.
 - Add structured test execution pipeline and historical analytics dashboard.
 - Expand frontend beyond scaffold to full product UI.
 
