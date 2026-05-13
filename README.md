@@ -109,3 +109,24 @@ Projects are user-scoped: each user can only access their own project data.
 ```bash
 alembic upgrade head
 ```
+
+
+## Test Execution Engine (Phase 5)
+
+- Run a single test case: `POST /test-cases/{id}/run`
+- View single test case run history: `GET /test-cases/{id}/runs`
+- Run a full suite: `POST /test-suites/{id}/run`
+- View suite run history: `GET /test-suites/{id}/runs`
+- View all runs for current user: `GET /test-runs` and `GET /test-runs/{id}`
+
+The execution engine uses `httpx` to send stored requests and validates:
+- expected status code
+- expected JSON field/value
+- response-time threshold
+
+Each run stores pass/fail status, failure reason, actual status code, actual response time, timestamp, and a small response preview.
+
+### Planned Improvements
+- Add dedicated frontend pages for run history and suite execution controls.
+- Add richer assertion operators (contains, not-equals, regex, array length).
+- Add asynchronous/background suite execution for long-running suites.
