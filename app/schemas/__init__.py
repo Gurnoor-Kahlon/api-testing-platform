@@ -3,3 +3,6 @@ from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.schemas.task import Task, TaskCreate, TaskUpdate
 from app.schemas.test_run import TestRunCreate, TestRunResponse
 from app.schemas.test_session import TestSessionResponse
+
+from app.schemas.api_test_case import APITestCaseCreate, APITestCaseResponse, APITestCaseUpdate
+from app.schemas.test_suite import TestSuiteCreate, TestSuiteResponse, TestSuiteUpdate

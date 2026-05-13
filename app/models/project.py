@@ -13,3 +13,5 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     owner = relationship("User", back_populates="projects")
+    test_cases = relationship("APITestCase", back_populates="project", cascade="all, delete-orphan")
+    test_suites = relationship("TestSuite", back_populates="project", cascade="all, delete-orphan")

@@ -9,6 +9,8 @@ from app.routers.tasks import router as tasks_router
 from app.routers.testruns import router as testruns_router
 from app.routers.testsessions import router as testsessions_router
 from app.routers.projects import router as projects_router
+from app.routers.test_cases import router as test_cases_router
+from app.routers.test_suites import router as test_suites_router
 
 app = FastAPI(title=settings.app_name)
 
@@ -37,3 +39,6 @@ app.include_router(tasks_router)
 app.include_router(testruns_router)
 app.include_router(testsessions_router)
 app.include_router(projects_router)
+
+app.include_router(test_cases_router)
+app.include_router(test_suites_router)
