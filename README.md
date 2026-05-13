@@ -67,3 +67,15 @@ pytest
 - Add project/suite/test-case domain models.
 - Add structured test execution pipeline and historical analytics dashboard.
 - Expand frontend beyond scaffold to full product UI.
+
+
+## Backend Architecture
+- Backend modules are organized by concern under `app/core`, `app/db`, `app/models`, `app/schemas`, `app/routers`, `app/services`, and `app/repositories`.
+- Legacy imports (`app.database`, `app.models`, `app.schemas`, `app.auth`) remain as compatibility shims while the architecture evolves.
+
+## Database Migrations
+- Alembic is configured in `alembic.ini` and `alembic/`.
+- Run migrations with:
+```bash
+alembic upgrade head
+```
