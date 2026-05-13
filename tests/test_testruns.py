@@ -1,247 +1,74 @@
-def get_auth_headers(client):
-    response = client.post(
-        "/auth/login",
-        json={"email": "admin@example.com", "password": "password123"}
-    )
-    if response.status_code != 200:
-        client.post("/auth/register", json={"email": "admin@example.com", "full_name": "Admin User", "password": "password123"})
-        response = client.post("/auth/login", json={"email": "admin@example.com", "password": "password123"})
-    token = response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+from unittest.mock import patch
+
+from tests.test_api_test_cases import _create_project, _headers
 
 
-def test_create_test_run(client):
-    headers = get_auth_headers(client)
+def _create_case(client, headers, project_id, **overrides):
+    payload = {
+        "name": "Health endpoint",
+        "http_method": "GET",
+        "url": "https://api.example.com/health",
+        "expected_status_code": 200,
+        "expected_response_time_ms": 500,
+        "expected_json_field": "status",
+        "expected_json_value": "ok",
+    }
+    payload.update(overrides)
+    response = client.post(f"/projects/{project_id}/test-cases", headers=headers, json=payload)
+    assert response.status_code == 201
+    return response.json()["id"]
 
-    response = client.post(
-        "/test-runs",
-        json={
-            "test_name": "Sample Test",
-            "test_type": "api",
-            "status": "passed",
-            "result": "Everything OK",
-            "execution_time": 1.5
-        },
-        headers=headers
-    )
+
+def test_run_test_case_passed(client):
+    headers = _headers(client, "run-pass@example.com")
+    project_id = _create_project(client, headers)
+    case_id = _create_case(client, headers, project_id)
+
+    with patch("app.routers.testruns.execute_test_case", return_value={"status": "passed", "failure_reason": None, "actual_status_code": 200, "actual_response_time_ms": 10.0, "response_preview": {"status": "ok"}}):
+        response = client.post(f"/test-cases/{case_id}/run", headers=headers)
 
     assert response.status_code == 201
-    data = response.json()
-    assert data["test_name"] == "Sample Test"
-    assert data["test_type"] == "api"
-    assert data["status"] == "passed"
+    assert response.json()["status"] == "passed"
 
 
-def test_test_run_summary(client):
-    headers = get_auth_headers(client)
+def test_run_test_case_failed_json_assertion(client):
+    headers = _headers(client, "run-fail@example.com")
+    project_id = _create_project(client, headers)
+    case_id = _create_case(client, headers, project_id)
 
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "Test 1",
-            "test_type": "api",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 1.0
-        },
-        headers=headers
-    )
+    with patch("app.routers.testruns.execute_test_case", return_value={"status": "failed", "failure_reason": "Expected JSON field 'status' to equal 'ok', got 'bad'", "actual_status_code": 200, "actual_response_time_ms": 11.0, "response_preview": {"status": "bad"}}):
+        response = client.post(f"/test-cases/{case_id}/run", headers=headers)
 
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "Test 2",
-            "test_type": "api",
-            "status": "failed",
-            "result": "Error",
-            "execution_time": 1.2
-        },
-        headers=headers
-    )
-
-    response = client.get("/test-runs/stats", headers=headers)
-
-    assert response.status_code == 200
-    data = response.json()
-
-    assert data["total"] >= 2
-    assert data["passed"] >= 1
-    assert data["failed"] >= 1
+    assert response.status_code == 201
+    assert "Expected JSON field" in response.json()["failure_reason"]
 
 
-def test_filter_test_runs_by_status(client):
-    headers = get_auth_headers(client)
+def test_suite_execution_summary(client):
+    headers = _headers(client, "suite-run@example.com")
+    project_id = _create_project(client, headers)
+    case_a = _create_case(client, headers, project_id, name="Case A")
+    case_b = _create_case(client, headers, project_id, name="Case B")
+    suite_id = client.post(f"/projects/{project_id}/test-suites", headers=headers, json={"name": "Suite", "description": "desc"}).json()["id"]
+    client.post(f"/test-suites/{suite_id}/test-cases/{case_a}", headers=headers)
+    client.post(f"/test-suites/{suite_id}/test-cases/{case_b}", headers=headers)
 
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "Passed Test",
-            "test_type": "api",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 1.0
-        },
-        headers=headers
-    )
+    side_effects = [
+        {"status": "passed", "failure_reason": None, "actual_status_code": 200, "actual_response_time_ms": 10.0, "response_preview": {"status": "ok"}},
+        {"status": "failed", "failure_reason": "Expected status 200, got 500", "actual_status_code": 500, "actual_response_time_ms": 12.0, "response_preview": {"status": "error"}},
+    ]
+    with patch("app.routers.testruns.execute_test_case", side_effect=side_effects):
+        run = client.post(f"/test-suites/{suite_id}/run", headers=headers)
 
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "Failed Test",
-            "test_type": "api",
-            "status": "failed",
-            "result": "Error",
-            "execution_time": 1.2
-        },
-        headers=headers
-    )
-
-    response = client.get("/test-runs?status=passed", headers=headers)
-
-    assert response.status_code == 200
-    data = response.json()
-
-    assert isinstance(data, list)
-    assert len(data) >= 1
-    assert all(test_run["status"] == "passed" for test_run in data)
+    assert run.status_code == 201
+    body = run.json()
+    assert body["total_tests"] == 2
+    assert body["passed_count"] == 1
+    assert body["failed_count"] == 1
 
 
-def test_sort_test_runs(client):
-    headers = get_auth_headers(client)
-
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "Test A",
-            "test_type": "api",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 2.0
-        },
-        headers=headers
-    )
-
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "Test B",
-            "test_type": "api",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 1.0
-        },
-        headers=headers
-    )
-
-    response = client.get("/test-runs?sort=execution_time", headers=headers)
-
-    assert response.status_code == 200
-    data = response.json()
-
-    assert len(data) >= 2
-    assert data[0]["execution_time"] <= data[1]["execution_time"]
-
-
-def test_create_test_run_invalid_type(client):
-    headers = get_auth_headers(client)
-
-    response = client.post(
-        "/test-runs",
-        json={
-            "test_name": "Bad Type Test",
-            "test_type": "mobile",
-            "status": "passed",
-            "result": "Should fail",
-            "execution_time": 1.0
-        },
-        headers=headers
-    )
-
-    assert response.status_code == 422
-
-def test_filter_test_runs_by_test_type(client):
-    headers = get_auth_headers(client)
-
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "API Test",
-            "test_type": "api",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 1.0
-        },
-        headers=headers
-    )
-
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "UI Test",
-            "test_type": "ui",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 1.5
-        },
-        headers=headers
-    )
-
-    response = client.get("/test-runs?test_type=ui", headers=headers)
-
-    assert response.status_code == 200
-    data = response.json()
-
-    assert isinstance(data, list)
-    assert len(data) >= 1
-    assert all(test_run["test_type"] == "ui" for test_run in data)
-
-def test_filter_test_runs_by_status_and_test_type(client):
-    headers = get_auth_headers(client)
-
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "API Passed",
-            "test_type": "api",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 1.0
-        },
-        headers=headers
-    )
-
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "UI Failed",
-            "test_type": "ui",
-            "status": "failed",
-            "result": "Error",
-            "execution_time": 1.2
-        },
-        headers=headers
-    )
-
-    client.post(
-        "/test-runs",
-        json={
-            "test_name": "UI Passed",
-            "test_type": "ui",
-            "status": "passed",
-            "result": "OK",
-            "execution_time": 1.1
-        },
-        headers=headers
-    )
-
-    response = client.get("/test-runs?status=passed&test_type=ui", headers=headers)
-
-    assert response.status_code == 200
-    data = response.json()
-
-    assert isinstance(data, list)
-    assert len(data) >= 1
-    assert all(
-        test_run["status"] == "passed" and test_run["test_type"] == "ui"
-        for test_run in data
-    )
+def test_run_access_control(client):
+    owner = _headers(client, "owner-runs@example.com")
+    other = _headers(client, "other-runs@example.com")
+    project_id = _create_project(client, owner)
+    case_id = _create_case(client, owner, project_id)
+    assert client.post(f"/test-cases/{case_id}/run", headers=other).status_code == 404
