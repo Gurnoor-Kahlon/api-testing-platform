@@ -8,6 +8,7 @@ from app.routers.auth import router as auth_router
 from app.routers.tasks import router as tasks_router
 from app.routers.testruns import router as testruns_router
 from app.routers.testsessions import router as testsessions_router
+from app.routers.projects import router as projects_router
 
 app = FastAPI(title=settings.app_name)
 
@@ -35,3 +36,4 @@ app.include_router(auth_router)
 app.include_router(tasks_router)
 app.include_router(testruns_router)
 app.include_router(testsessions_router)
+app.include_router(projects_router)

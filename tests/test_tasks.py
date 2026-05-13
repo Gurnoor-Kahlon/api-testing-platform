@@ -147,7 +147,7 @@ def test_create_task_invalid_description(client, auth_headers):
 def test_tasks_requires_auth_header(client):
     response = client.get("/tasks")
     assert response.status_code == 401
-    assert response.json() == {"detail": "Authorization header missing"}
+    assert response.json() == {"detail": "Authentication required"}
 
 
 def test_tasks_rejects_invalid_token(client):
