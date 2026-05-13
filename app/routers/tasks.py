@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.security import verify_token
+from app.core.security import get_current_user
 from app.db.session import get_db
 from app.schemas.task import Task, TaskCreate, TaskUpdate
 from app.services.task_service import TaskService
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"], dependencies=[Depends(verify_token)])
+router = APIRouter(prefix="/tasks", tags=["Tasks"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("", response_model=list[Task])

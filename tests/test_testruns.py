@@ -1,8 +1,11 @@
 def get_auth_headers(client):
     response = client.post(
         "/auth/login",
-        json={"username": "admin", "password": "password123"}
+        json={"email": "admin@example.com", "password": "password123"}
     )
+    if response.status_code != 200:
+        client.post("/auth/register", json={"email": "admin@example.com", "full_name": "Admin User", "password": "password123"})
+        response = client.post("/auth/login", json={"email": "admin@example.com", "password": "password123"})
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 

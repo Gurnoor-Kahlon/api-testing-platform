@@ -58,12 +58,38 @@ Run backend tests:
 pytest
 ```
 
+
+## Authentication Flow
+- Register with `POST /auth/register` using email, full name, and password.
+- Login with `POST /auth/login` to receive a JWT access token.
+- Call protected endpoints using `Authorization: Bearer <token>`.
+- Get the current user with `GET /auth/me`.
+
+### Example Requests
+```bash
+curl -X POST http://localhost:8000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dev@example.com","full_name":"Dev User","password":"SecurePass123"}'
+
+curl -X POST http://localhost:8000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dev@example.com","password":"SecurePass123"}'
+```
+
+### Protected Project Endpoints
+- `POST /projects`
+- `GET /projects`
+- `GET /projects/{id}`
+- `PUT /projects/{id}`
+- `DELETE /projects/{id}`
+
+Projects are user-scoped: each user can only access their own project data.
+
 ## Security Notes
 - Never commit real secrets or `.env` files.
 - Use `.env.example` and `.env.docker.example` for safe defaults only.
 
 ## Planned Improvements
-- Replace demo token auth with JWT + hashed passwords.
 - Add project/suite/test-case domain models.
 - Add structured test execution pipeline and historical analytics dashboard.
 - Expand frontend beyond scaffold to full product UI.
