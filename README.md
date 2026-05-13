@@ -3,8 +3,8 @@
 A full-stack learning project for building a professional automated API testing platform with FastAPI, React, Docker, and CI.
 
 ## Current Scope
-- FastAPI backend with auth, project management, API test case management, test suite management, test run tracking, and test session endpoints.
-- React + Vite frontend scaffold.
+- FastAPI backend with auth, project management, API test case management, test suite management, test run tracking, test session endpoints, and dashboard analytics endpoints.
+- React + Vite frontend with a polished dashboard, summary cards, recent-run tables, failures feed, and responsive navigation.
 - Automated backend test suite with pytest.
 - Docker Compose setup for API + PostgreSQL + Selenium.
 - GitHub Actions workflow running tests on pull requests and pushes to `main`.
@@ -89,6 +89,27 @@ curl -X POST http://localhost:8000/auth/login \
 - `DELETE /projects/{id}`
 
 Projects are user-scoped: each user can only access their own project data.
+
+
+## Demo Flow
+1. Register/Login.
+2. Create a project.
+3. Create API test cases.
+4. Create a test suite and add test cases.
+5. Run test cases or suites.
+6. View dashboard analytics and run results.
+
+## Dashboard Endpoints
+- `GET /dashboard/summary`
+- `GET /dashboard/recent-runs`
+- `GET /dashboard/pass-rate`
+- `GET /dashboard/failures`
+
+## Screenshots
+Add real product screenshots here after running the UI locally:
+- Login screen
+- Dashboard overview
+- Latest runs and recent failures
 
 ## Security Notes
 - Never commit real secrets or `.env` files.
